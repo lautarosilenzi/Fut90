@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/*
+ * Paleta de Fut90. Mantené estos valores sincronizados con
+ * src/lib/branding/colors.ts — ese archivo es la referencia legible
+ * para JS/TS, este bloque es lo que Tailwind necesita para generar
+ * las clases de utilidad (bg-brand-700, text-accent-400, etc).
+ */
+@theme {
+  --color-brand-50: #eff4fc;
+  --color-brand-100: #dce7f8;
+  --color-brand-200: #bcd1f0;
+  --color-brand-300: #93b3e3;
+  --color-brand-400: #6690d2;
+  --color-brand-500: #3f70be;
+  --color-brand-600: #2d59a0;
+  --color-brand-700: #1e3a8a;
+  --color-brand-800: #172c69;
+  --color-brand-900: #101f4c;
+  --color-brand-950: #0b1633;
+
+  --color-accent-300: #f8d585;
+  --color-accent-400: #f5c451;
+  --color-accent-500: #f2b705;
+  --color-accent-600: #c99404;
+
+  --color-neutral-50: #f5f7fc;
+  --color-neutral-100: #e9edf6;
+  --color-neutral-200: #d2daea;
+  --color-neutral-300: #abb8d1;
+  --color-neutral-400: #8393b4;
+  --color-neutral-500: #5a6d93;
+  --color-neutral-600: #33456b;
+  --color-neutral-700: #223154;
+  --color-neutral-800: #16213b;
+  --color-neutral-900: #10192e;
+  --color-neutral-950: #0b1220;
+
+  --color-live: #e11d2e;
+  --color-success: #22c55e;
+  --color-warning: #f97316;
+  --color-danger: #e11d2e;
+
+  --font-display: var(--font-bebas-neue), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+}
+
+:root {
+  --background: var(--color-neutral-950);
+  --foreground: var(--color-neutral-50);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Texto tabular parejo para minutos, marcadores y tablas de posiciones */
+.tabular-score {
+  font-variant-numeric: tabular-nums;
+}
