@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/layout/Logo";
 import { Avatar } from "@/components/ui/Avatar";
+import { BirdIcon } from "@/components/ui/BirdIcon";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
 const links = [
@@ -23,21 +24,31 @@ export async function Header() {
             </Link>
           ))}
         </nav>
-        {user ? (
-          <Link href="/perfil" className="flex items-center gap-2">
-            <Avatar name={user.username} size="sm" />
-            <span className="hidden text-sm font-medium text-neutral-200 sm:inline">
-              @{user.username}
-            </span>
-          </Link>
-        ) : (
+        <div className="flex items-center gap-3">
           <Link
-            href="/login"
-            className="rounded-full bg-brand-700 px-4 py-1.5 text-sm font-semibold text-neutral-50 hover:bg-brand-600"
+            href="/tuits"
+            title="Tuits"
+            aria-label="Tuits"
+            className="flex h-8 w-8 items-center justify-center text-brand-500 transition-colors hover:text-brand-400"
           >
-            Ingresar
+            <BirdIcon className="h-6 w-6" />
           </Link>
-        )}
+          {user ? (
+            <Link href="/perfil" className="flex items-center gap-2">
+              <Avatar name={user.username} avatarUrl={user.avatarUrl} size="sm" />
+              <span className="hidden text-sm font-medium text-neutral-200 sm:inline">
+                @{user.username}
+              </span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full bg-brand-700 px-4 py-1.5 text-sm font-semibold text-neutral-50 hover:bg-brand-600"
+            >
+              Ingresar
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

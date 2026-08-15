@@ -196,3 +196,70 @@ create policy "Cada usuario desbloquea a su propio nombre" on public.blocks
 -- Realtime: el chat necesita escuchar los inserts nuevos en `posts`
 -- ------------------------------------------------------------
 alter publication supabase_realtime add table public.posts;
+
+-- ============================================================
+-- v2 — sección Tuits: multimedia en posteos + Storage
+-- ============================================================
+-- Si ya habías corrido la v1 de este archivo, correr solo esto de acá
+-- para abajo no rompe nada (usa "if exists"/"if not exists" y
+-- "on conflict do nothing" a propósito). Si es la primera vez, correr
+-- el archivo entero de punta a punta también funciona.
+
+alter table public.posts
+  add column if not exists media_urls text[] not null default '{}';
+
+-- Antes el contenido era obligatorio (1 a 280 caracteres). Ahora un
+-- tuit puede ser solo foto/video, sin texto — pero si no tiene
+-- multimedia, sigue necesitando al menos 1 caracter.
+alter table public.posts drop constraint if exists posts_content_check;
+alter table public.posts add constraint posts_content_check check (
+  char_length(content) <= 280
+  and (char_length(content) >= 1 or array_length(media_urls, 1) >= 1)
+);
+
+alter table public.posts add constraint posts_media_urls_check check (
+  array_length(media_urls, 1) is null or array_length(media_urls, 1) <= 4
+);
+
+create index if not exists posts_parent_post_id_idx on public.posts (parent_post_id);
+create index if not exists likes_post_id_idx on public.likes (post_id);
+create index if not exists reposts_post_id_idx on public.reposts (post_id);
+create index if not exists follows_following_id_idx on public.follows (following_id);
+
+-- Buckets de Storage: multimedia de tuits y fotos de perfil. Públicos
+-- para leer (son de un feed público), pero cada usuario solo puede
+-- escribir dentro de su propia carpeta (el primer segmento del path
+-- tiene que ser su user id — eso lo pone el código de la app solo).
+insert into storage.buckets (id, name, public)
+values ('post-media', 'post-media', true)
+on conflict (id) do nothing;
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+create policy "Multimedia de tuits es pública para leer" on storage.objects
+  for select using (bucket_id = 'post-media');
+
+create policy "Cada usuario sube su propia multimedia" on storage.objects
+  for insert with check (
+    bucket_id = 'post-media' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Cada usuario borra su propia multimedia" on storage.objects
+  for delete using (
+    bucket_id = 'post-media' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Fotos de perfil son públicas para leer" on storage.objects
+  for select using (bucket_id = 'avatars');
+
+create policy "Cada usuario sube su propia foto de perfil" on storage.objects
+  for insert with check (
+    bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+create policy "Cada usuario borra su propia foto de perfil" on storage.objects
+  for delete using (
+    bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text
+  );

@@ -44,6 +44,7 @@ export interface Database {
           author_id: string;
           match_id: string | null;
           content: string;
+          media_urls: string[];
           parent_post_id: string | null;
           is_deleted: boolean;
           created_at: string;
@@ -53,6 +54,7 @@ export interface Database {
           author_id: string;
           match_id?: string | null;
           content: string;
+          media_urls?: string[];
           parent_post_id?: string | null;
           is_deleted?: boolean;
           created_at?: string;

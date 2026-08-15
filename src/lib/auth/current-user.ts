@@ -6,6 +6,7 @@ export interface CurrentUser {
   id: string;
   username: string;
   displayName: string | null;
+  avatarUrl: string | null;
   isAdmin: boolean;
 }
 
@@ -21,7 +22,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, display_name, is_admin")
+    .select("username, display_name, avatar_url, is_admin")
     .eq("id", user.id)
     .single();
 
@@ -31,6 +32,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     id: user.id,
     username: profile.username,
     displayName: profile.display_name,
+    avatarUrl: profile.avatar_url,
     isAdmin: profile.is_admin,
   };
 }

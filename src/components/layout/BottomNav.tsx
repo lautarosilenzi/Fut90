@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode } from "react";
+import { BirdIcon } from "@/components/ui/BirdIcon";
 
 const items: { href: string; label: string; icon: ReactNode }[] = [
   {
@@ -28,6 +29,11 @@ const items: { href: string; label: string; icon: ReactNode }[] = [
         <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" stroke="currentColor" strokeLinecap="round" />
       </svg>
     ),
+  },
+  {
+    href: "/tuits",
+    label: "Tuits",
+    icon: <BirdIcon className="h-5 w-5 text-brand-400" />,
   },
   {
     href: "/posiciones",
@@ -58,7 +64,7 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-800 bg-neutral-950/95 backdrop-blur pb-[env(safe-area-inset-bottom)] sm:hidden"
       aria-label="Navegación principal"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {items.map((item) => {
           const active =
             item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
