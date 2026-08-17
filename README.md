@@ -159,17 +159,23 @@ funciona aunque tengas la app cerrada, como una notificación de app nativa.
 
 **Quién manda los avisos, en la práctica**: la ruta
 `/api/cron/send-match-reminders` revisa qué avisos ya vencieron y los
-manda. Algo tiene que llamarla cada pocos minutos:
+manda. Algo tiene que llamarla seguido para que el aviso llegue cerca del
+horario real del partido:
 
-- **Desplegando en Vercel**: ya está configurado en `vercel.json` para
-  llamarse sola cada 5 minutos. **Ojo**: el plan gratis (Hobby) de Vercel
-  limita los cron jobs a una vez por día — para que llegue cerca del
-  horario real del partido hace falta el plan Pro, **o** un cron externo
-  gratis (ver abajo) apuntando a esa misma ruta.
-- **Alternativa gratis con cualquier plan**: un servicio como
-  [cron-job.org](https://cron-job.org) (gratis) configurado para pegarle
-  a `https://tu-dominio.vercel.app/api/cron/send-match-reminders` cada 5
-  minutos, mandando el header `Authorization: Bearer TU_CRON_SECRET`.
+- **`vercel.json` ya trae un cron una vez por día** (`0 12 * * *`, mediodía
+  UTC) — es lo máximo que permite el plan gratis (Hobby) de Vercel; con
+  eso solo, un aviso puede llegar hasta 24 hs tarde, así que por sí solo
+  no alcanza para "15 minutos antes". Sirve como red de respaldo, no como
+  mecanismo principal.
+- **Para que llegue de verdad cerca del partido**, sumá un cron externo
+  gratis apuntando a la misma ruta cada 5 minutos — por ejemplo
+  [cron-job.org](https://cron-job.org), configurado para pegarle a
+  `https://tu-dominio.vercel.app/api/cron/send-match-reminders` cada 5
+  minutos, mandando el header `Authorization: Bearer TU_CRON_SECRET`. Esto
+  funciona en cualquier plan de Vercel, incluido el gratis.
+- Si tenés **Vercel Pro**, podés subir la frecuencia del cron de
+  `vercel.json` vos mismo (por ejemplo a `*/5 * * * *`) y no hace falta
+  nada externo.
 - **En local** (`npm run dev`), probalo a mano visitando esa URL en el
   navegador — no hace falta el header si no configuraste `CRON_SECRET`.
 
