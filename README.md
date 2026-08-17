@@ -159,25 +159,24 @@ funciona aunque tengas la app cerrada, como una notificación de app nativa.
 
 **Quién manda los avisos, en la práctica**: la ruta
 `/api/cron/send-match-reminders` revisa qué avisos ya vencieron y los
-manda. Algo tiene que llamarla seguido para que el aviso llegue cerca del
-horario real del partido:
+manda — pero no se llama sola, algo tiene que pegarle cada pocos minutos.
+Este proyecto **no incluye un `vercel.json`** a propósito: el cron nativo
+de Vercel en el plan gratis (Hobby) solo puede correr una vez por día, lo
+que no alcanza para avisar "15 minutos antes" y además puede hacer fallar
+el deploy si el plan cambia sus límites. En cambio:
 
-- **`vercel.json` ya trae un cron una vez por día** (`0 12 * * *`, mediodía
-  UTC) — es lo máximo que permite el plan gratis (Hobby) de Vercel; con
-  eso solo, un aviso puede llegar hasta 24 hs tarde, así que por sí solo
-  no alcanza para "15 minutos antes". Sirve como red de respaldo, no como
-  mecanismo principal.
-- **Para que llegue de verdad cerca del partido**, sumá un cron externo
-  gratis apuntando a la misma ruta cada 5 minutos — por ejemplo
-  [cron-job.org](https://cron-job.org), configurado para pegarle a
-  `https://tu-dominio.vercel.app/api/cron/send-match-reminders` cada 5
-  minutos, mandando el header `Authorization: Bearer TU_CRON_SECRET`. Esto
-  funciona en cualquier plan de Vercel, incluido el gratis.
-- Si tenés **Vercel Pro**, podés subir la frecuencia del cron de
-  `vercel.json` vos mismo (por ejemplo a `*/5 * * * *`) y no hace falta
-  nada externo.
+- **Configurá un cron externo gratis** apuntando a esa ruta cada 5
+  minutos — por ejemplo [cron-job.org](https://cron-job.org) (gratis, sin
+  tarjeta), pegándole a
+  `https://tu-dominio.vercel.app/api/cron/send-match-reminders` con el
+  header `Authorization: Bearer TU_CRON_SECRET`. Funciona igual en
+  cualquier plan de Vercel, no hace falta tocar nada del deploy.
 - **En local** (`npm run dev`), probalo a mano visitando esa URL en el
   navegador — no hace falta el header si no configuraste `CRON_SECRET`.
+- Si en algún momento pasás a **Vercel Pro** y preferís que Vercel mismo
+  dispare el cron, podés agregar tu propio `vercel.json` con
+  `{ "crons": [{ "path": "/api/cron/send-match-reminders", "schedule": "*/5 * * * *" }] }`
+  — no es necesario, es solo una alternativa.
 
 Sin `NEXT_PUBLIC_VAPID_PUBLIC_KEY`/`VAPID_PRIVATE_KEY` configuradas, el
 botón "Avisarme" avisa que las notificaciones no están disponibles — el
@@ -235,7 +234,6 @@ src/
     timeline/            tuits: queries, acciones, subida de multimedia
     notifications/       suscripción push y avisos "Avisarme" por partido
 supabase/schema.sql    script de base de datos (correr una vez en Supabase)
-vercel.json            programa el cron de notificaciones en Vercel
 public/sw.js           service worker (solo muestra las notificaciones push)
 ```
 
